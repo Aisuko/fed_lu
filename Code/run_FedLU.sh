@@ -39,16 +39,16 @@ CUDA_VISIBLE_DEVICES=${gpu} python -u fedlu.py --cuda \
 --model "${km}" \
 --client_num 3 \
 --max_epoch 3 \
---max_iter 200 \
+--max_iter 10 \
 --hidden_dim 256 \
 --learning_rate "${lr}" \
 --gamma "${g}" \
---valid_iter 5 \
---early_stop_iter 3 \
---wait_iter 20 \
---test_batch_size 8 \
---batch_size 512 \
---cpu_num 16 \
+--valid_iter 1 \
+--early_stop_iter 2 \
+--wait_iter 2 \
+--test_batch_size 32 \
+--batch_size 1024 \
+--cpu_num 15 \
 | tee -a "${log_folder}"/C3FedLU_"${km}"_gamma"${g}"_dist"${dm}"_lr"${lr}"_"${cur_time}".txt
 sleep 8
 done

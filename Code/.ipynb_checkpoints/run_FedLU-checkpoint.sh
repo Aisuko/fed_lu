@@ -17,36 +17,39 @@ if [[ ! -d ${log_folder} ]];then
 fi
 
 kge_method=(TransE ComplEx RotatE)
+dist_para=(2.0)
 gamma=(10.0 20.0 50.0)
 learningrate=(1e-4)
-entityregularization=(1e-1)
 for km in "${kge_method[@]}"
+do
+for dm in "${dist_para[@]}"
 do
 for g in "${gamma[@]}"
 do
 for lr in "${learningrate[@]}"
 do
-for er in "${entityregularization[@]}"
-do
 cur_time="$(date +%Y%m%d%H%M%S)"
-CUDA_VISIBLE_DEVICES=${gpu} python -u controller.py --cuda \
+CUDA_VISIBLE_DEVICES=${gpu} python -u fedlu.py --cuda \
 --local_file_dir ../Data/FB15k-237/C3FL \
---save_dir ../Output/FB15k-237/C3FedProx"${km}" \
---fed_mode FedProx \
+--save_dir ../Output/FB15k-237/C3FedLU"${km}" \
+--fed_mode FedDist \
+--co_dist \
+--dist_mu "${dm}" \
 --agg weighted \
 --model "${km}" \
 --client_num 3 \
---max_epoch 1 \
+--max_epoch 3 \
 --max_iter 10 \
---learning_rate "${lr}" \
 --hidden_dim 256 \
+--learning_rate "${lr}" \
 --gamma "${g}" \
 --valid_iter 1 \
 --early_stop_iter 3 \
---mu_single_entity \
---mu "${er}" \
---cpu_num 16 \
-| tee -a "${log_folder}"/C3FedProx_"${km}"_er"${er}"_gamma"${g}"_lr"${lr}"_"${cur_time}".txt
+--wait_iter 5 \
+--test_batch_size 32 \
+--batch_size 1024 \
+--cpu_num 15 \
+| tee -a "${log_folder}"/C3FedLU_"${km}"_gamma"${g}"_dist"${dm}"_lr"${lr}"_"${cur_time}".txt
 sleep 8
 done
 done
